@@ -1,0 +1,1511 @@
+{\rtf1\ansi\ansicpg936\cocoartf2636
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset134 PingFangSC-Regular;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+*** prevalence analysis\
+clear\
+use "Source_data_T1_gut_fungi_taxa_4800.dta"\
+\
+local i=0\
+foreach var of varlist its_g2-its_g644 \{\
+local i=`i'+1\
+\}\
+dis `i'   //643\
+\
+foreach var of varlist its_g2-its_g644 \{\
+count if `var'>0 \
+if r(N)<1 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g644 \{\
+local i=`i'+1\
+\}\
+dis `i'   //n=626\
+\
+\
+\
+foreach var of varlist its_g2-its_g644 \{\
+count if `var'>0 \
+if r(N)<480 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g644 \{\
+local i=`i'+1\
+\}\
+dis `i'   //10%, n=65\
+\
+\
+\
+foreach var of varlist its_g2-its_g633 \{\
+count if `var'>0 \
+if r(N)<1920 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g633 \{\
+local i=`i'+1\
+\}\
+dis `i'   //40%,n=20\
+\
+\
+\
+foreach var of varlist its_g2-its_g633 \{\
+count if `var'>0 \
+if r(N)<2400 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g597 \{\
+local i=`i'+1\
+\}\
+dis `i'   //50%,n=13\
+\
+\
+\
+\
+foreach var of varlist its_g2-its_g597 \{\
+count if `var'>0 \
+if r(N)<2880 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g597 \{\
+local i=`i'+1\
+\}\
+dis `i'   //60%,n=9\
+\
+\
+foreach var of varlist its_g2-its_g597 \{\
+count if `var'>0 \
+if r(N)<3360 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g237 \{\
+local i=`i'+1\
+\}\
+dis `i'   //70%,n=8\
+\
+\
+\
+\
+foreach var of varlist its_g2-its_g237 \{\
+count if `var'>0 \
+if r(N)<3840 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g237 \{\
+local i=`i'+1\
+\}\
+dis `i'   //80%,n=5\
+\
+\
+\
+foreach var of varlist its_g2-its_g237 \{\
+count if `var'>0 \
+if r(N)<4320 \{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g112-its_g237 \{\
+local i=`i'+1\
+\}\
+dis `i'   //90%,n=4\
+\
+\
+**** ###compositional variance explained by determinants, complete strategy was applied in this analysis, and 9 participants with missing information on any variables excluded from present analysis. thus 4781 participants were included in the present analysis. \
+**R code\
+> rm(list=ls())\
+> library(haven)\
+\
+> data1<-read_dta("Source_data_Explaining_fungi_variation_across4800participants.dta") #10% filtering\
+> data2 <- data1\
+> t<-names(data2)\
+> start<-grep("^its_g2$",t)\
+> end<-grep("^its_g644$",t)\
+> end<-grep("^its_g633$",t)\
+> data3<-data2[,c(1, start:end)]\
+> data3 <- as.data.frame(data3)\
+> row.names(data3) <- data3$ID\
+> data3<-data3[,-1]\
+> library(vegan)\
+> distance<-as.matrix(vegdist(data3, method = 'bray'))\
+> distance <- as.data.frame(distance)\
+\
+a11<-adonis2(data2[,c(start:end)]~as.factor(data2$batch)+data2$met+as.factor(data2$overweight)+as.factor(data2$parity)+data2$age+as.factor(data2$no_antibiotic_use_a)+as.factor(data2$drk)+as.factor(data2$tea)+as.factor(data2$cof)+as.factor(data2$fdfreq_a_milkpro)+data2$fd_fruit+data2$fd_vege+data2$fd_egg+data2$fd_meat+as.factor(data2$fdfreq_grain)+as.factor(data2$smk)+data2$fd_mantou+data2$fd_noodle+data2$fd_rice,permutations = 999, method = "bray", by="margin"); a11\
+\
+**Figure_2a  R code\
+> rm(list=ls())\
+> library(ggplot2)\
+> library(ggpubr)\
+> df <- readxl::read_xlsx("Source_data_variance_explained.xlsx",sheet = "Sheet1")\
+\
+> p <- ggdotchart(df, \
++            x = colnames(df)[1],\
++            y = colnames(df)[2],\
++            color = colnames(df)[3],\
++            rotate=TRUE, \
++            #palette = rainbow(dim(df)[2]), \
++            palette = c("#8a79f4","#ff70c3","#53ecc0","#af0043","#bae179"),\
++            #scale_fill_brewer(palette="Set2")+\
++            sorting = "descending",             \
++            add = "segments",              \
++            dot.size = 10,               \
++            add.params = list(color = "lightgray", size = 5),  \
++            position = position_dodge(0.1),                    \
++            label = round(df[[2]]),                            \
++            font.label = list(color = "white",                 \
++                              size = 0, \
++                              vjust = 0.5)\
++ )\
+> p\
+> ggsave(p, file="Figure_2a.pdf", width=5, height=8)\
+\
+******gut fungal enterotype analysis, n=6540\
+**R code\
+library(tidyverse)\
+library(haven)\
+library(vegan)\
+library(ade4)\
+library(cluster)\
+library(ggdendro)\
+library(sparcl)\
+library(factoextra)\
+library(RColorBrewer)\
+library(ggplot2)\
+library(reshape2)\
+library(ggsci)\
+library(cowplot)\
+library(readxl)\
+rm(list = ls())\
+\
+data1 <- read_dta("Source_data_fungi_RA_6540_for_PAM.dta")\
+\
+#############################################\
+ITS_data <- data1[,c(5:ncol(data1))]\
+rownames(ITS_data ) <- data1$ID\
+\
+ITS1_colors=c("#C1CD24", "#D23837", "#439FC2", "#5E52A0")\
+\
+\
+pam.clustering=function(x,k) \{\
+  # x is a distance matrix and k the number of clusters\
+  require(cluster)\
+  cluster = as.vector(pam(as.dist(x), k, diss=TRUE)$clustering)\
+  return(cluster)\
+\}\
+\
+dist.JSD <- function(inMatrix, pseudocount=0.000001, ...) \{\
+  #inMatrix =t(data)\
+  KLD <- function(x,y) sum(x *log(x/y))\
+  JSD<- function(x,y) sqrt(0.5 * KLD(x, (x+y)/2) + 0.5 * KLD(y, (x+y)/2))\
+  matrixColSize <- length(colnames(inMatrix))\
+  matrixRowSize <- length(rownames(inMatrix))\
+  colnames <- colnames(inMatrix)\
+  resultsMatrix <- matrix(0, matrixColSize, matrixColSize)\
+  \
+  inMatrix = apply(inMatrix,1:2,function(x) ifelse (x==0,pseudocount,x))\
+  \
+  for(i in 1:matrixColSize) \{\
+    for(j in 1:matrixColSize) \{\
+      resultsMatrix[i,j]=JSD(as.vector(inMatrix[,i]),\
+                             as.vector(inMatrix[,j]))\
+    \}\
+  \}\
+  colnames -> colnames(resultsMatrix) -> rownames(resultsMatrix)\
+  as.dist(resultsMatrix)->resultsMatrix\
+  attr(resultsMatrix, "method") <- "dist"\
+  return(resultsMatrix)\
+\}\
+\
+\
+#ITS1_data <- ITS_data[,2:ncol(ITS_data)] \
+#rownames(ITS1_data) <- ITS_data$ID\
+ITS1_data <- ITS_data\
+\
+#ITS1_data = ITS1_data[rowSums(ITS1_data)>1000,]\
+ITS1_data_rel = ITS1_data/rowSums(ITS1_data)\
+ITS1_data_rel_filter = ITS1_data_rel[,colSums(ITS1_data_rel>0)>=10]\
+#ITS1_inf_filter = ITS1_inf[rownames(ITS1_data_rel_filter),]\
+data = ITS1_data_rel_filter\
+\
+\
+\
+### CH index\
+data.dist = dist.JSD((t(data)))\
+fit <- cascadeKM(data.dist,1,10,iter=10,criterion="calinski")\
+calinski.best <- as.numeric(which.max(fit$results[2,]))\
+cluster_result=data.frame(fit$results["calinski",])\
+colnames(cluster_result)="Calinski_criterion"\
+cluster_result$cluster=1:nrow(cluster_result)\
+cluster_result$method='JSD'\
+cluster_result1 = cluster_result\
+\
+data.dist = vegdist(data,method='bray')\
+fit <- cascadeKM(data.dist,1,10,iter=10,criterion="calinski")\
+calinski.best <- as.numeric(which.max(fit$results[2,]))\
+cluster_result=data.frame(fit$results["calinski",])\
+colnames(cluster_result)="Calinski_criterion"\
+cluster_result$cluster=1:nrow(cluster_result)\
+cluster_result$method='Bray'\
+cluster_result2 = cluster_result\
+\
+data.dist = vegdist(data,method='jaccard')\
+fit <- cascadeKM(data.dist,1,10,iter=10,criterion="calinski")\
+calinski.best <- as.numeric(which.max(fit$results[2,]))\
+cluster_result=data.frame(fit$results["calinski",])\
+colnames(cluster_result)="Calinski_criterion"\
+cluster_result$cluster=1:nrow(cluster_result)\
+cluster_result$method='Jaccard'\
+cluster_result3 = cluster_result\
+\
+data.dist = vegdist(data,method='kulczynski')\
+fit <- cascadeKM(data.dist,1,10,iter=10,criterion="calinski")\
+calinski.best <- as.numeric(which.max(fit$results[2,]))\
+cluster_result=data.frame(fit$results["calinski",])\
+colnames(cluster_result)="Calinski_criterion"\
+cluster_result$cluster=1:nrow(cluster_result)\
+cluster_result$method='Kulczynski'\
+cluster_result4 = cluster_result\
+\
+cluster_result = rbind(cluster_result1,cluster_result2,cluster_result3,cluster_result4)\
+\
+pdf("./CH_index_ITS_order.pdf",width=5,height=5)\
+#pdf("./CH_index_ITS_phylum.pdf",width=5,height=5)\
+ggplot(cluster_result,aes(x=cluster,y=Calinski_criterion)) +\
+  geom_point(size=2) + geom_line(aes(color=method,group=method)) +\
+  theme_bw() + labs(x="Number of clusters",y="CH index",title="ITS1-combined dataset",color="Distance-matrices") +\
+  geom_vline(xintercept=4,color='red') +\
+  theme(\
+    panel.grid = element_blank(),\
+    axis.title = element_text(size=16,color='black'),\
+    axis.text = element_text(size=14,color="black"),\
+    plot.title = element_text(size=18,color="black",hjust=0.5),\
+    legend.text = element_text(size=14),\
+    legend.title = element_text(size=14)\
+  ) +\
+  scale_color_manual(values=c("#F19D45","#205078","#275A39","#8DC484","#7472AE","#C04D87","#F6C564","#81A9CC"))\
+dev.off()\
+\
+### Silhouette score\
+data.dist = dist.JSD((t(data)))\
+x=c()\
+for(i in 2:20)\{\
+  data.cluster = pam.clustering(data.dist,k=i)\
+  sil <- silhouette(data.cluster,data.dist)\
+  sil_result=data.frame(sil[, 1:3])\
+  rownames(sil_result) = rownames(data)\
+  #mean(sil_result$sil_width)\
+  x=c(x,mean(sil_result$sil_width))\
+\}\
+sil_plot1=data.frame(cluster_number=2:20,silhouette_score=x)\
+sil_plot1$method='JSD(PAM)'\
+\
+data.dist = vegdist(data,method='bray')\
+x=c()\
+for(i in 2:20)\{\
+  data.cluster = pam.clustering(data.dist,k=i)\
+  sil <- silhouette(data.cluster,data.dist)\
+  sil_result=data.frame(sil[, 1:3])\
+  rownames(sil_result) = rownames(data)\
+  #mean(sil_result$sil_width)\
+  x=c(x,mean(sil_result$sil_width))\
+\}\
+sil_plot2=data.frame(cluster_number=2:20,silhouette_score=x)\
+sil_plot2$method='Bray(PAM)'\
+\
+data.dist = vegdist(data,method='jaccard')\
+x=c()\
+for(i in 2:20)\{\
+  data.cluster = pam.clustering(data.dist,k=i)\
+  sil <- silhouette(data.cluster,data.dist)\
+  sil_result=data.frame(sil[, 1:3])\
+  rownames(sil_result) = rownames(data)\
+  #mean(sil_result$sil_width)\
+  x=c(x,mean(sil_result$sil_width))\
+\}\
+sil_plot3=data.frame(cluster_number=2:20,silhouette_score=x)\
+sil_plot3$method='Jaccard(PAM)'\
+\
+data.dist = vegdist(data,method='kulczynski')\
+x=c()\
+for(i in 2:20)\{\
+  data.cluster = pam.clustering(data.dist,k=i)\
+  sil <- silhouette(data.cluster,data.dist)\
+  sil_result=data.frame(sil[, 1:3])\
+  rownames(sil_result) = rownames(data)\
+  #mean(sil_result$sil_width)\
+  x=c(x,mean(sil_result$sil_width))\
+\}\
+sil_plot4=data.frame(cluster_number=2:20,silhouette_score=x)\
+sil_plot4$method='Kulczynski(PAM)'\
+\
+sil_plot = rbind(sil_plot1,sil_plot2,sil_plot3,sil_plot4)\
+\
+pdf("./Silhouette_score_ITS_order.pdf",width=5,height=5)\
+#pdf("./Silhouette_score_ITS_phylum.pdf",width=5,height=5)\
+ggplot(sil_plot[sil_plot$cluster_number<=10,],aes(x=cluster_number,y=silhouette_score)) +\
+  geom_point(size=2) + geom_line(aes(color=method,group=method)) +\
+  theme_bw() + labs(x="Number of clusters",y="Silhouette Score",title="ITS1-combined dataset",color="Distance-matrices") +\
+  geom_vline(xintercept=4,color='red') +\
+  theme(\
+    panel.grid = element_blank(),\
+    axis.title = element_text(size=16,color='black'),\
+    axis.text = element_text(size=14,color="black"),\
+    plot.title = element_text(size=18,color="black",hjust=0.5),\
+    legend.text = element_text(size=14),\
+    legend.title = element_text(size=14)\
+  ) +\
+  scale_color_manual(values=c("#F19D45","#205078","#275A39","#8DC484","#7472AE","#C04D87","#F6C564","#81A9CC"))\
+dev.off()\
+\
+# enterotype clustering results(
+\f1 \'b8\'f9\'be\'dd\'c9\'cf\'ca\'f6\'bd\'e1\'b9\'fb\'d1\'a1\'d4\'f1\'ba\'cf\'ca\'ca\'b2\'ce\'ca\'fd
+\f0 )\
+data.dist = vegdist(data,method='bray')\
+data.cluster = pam.clustering(data.dist,k=3)\
+\
+cluster_result = as.data.frame(data.cluster)\
+cluster_result$ID <- rownames(data)\
+\
+write.csv(cluster_result,'./PAM_cluster_RA_6540_for_PAM.csv',row.names = F, quote=F)\
+\
+\
+//gut fungal enterotypes by trimesters, T1,T2,T3, 750*3=2250\
+\
+clear\
+use  "Source_PAM_results_6540.dta"\
+merge 1:1 ID using "Source_data_repeated_ID_2250.dta" \
+keep if _merge==3\
+drop  _merge\
+keep if group=="V1"\
+rename datacluster cluster1\
+save "Source_data_fungal_enterotyp_T1.dta"\
+\
+\
+clear\
+use  "Source_PAM_results_6540.dta"\
+merge 1:1 ID using "Source_data_repeated_ID_2250.dta" \
+keep if _merge==3\
+drop  _merge \
+keep if group=="V2"\
+rename datacluster cluster2\
+save "Source_data_fungal_enterotyp_T2.dta"\
+\
+\
+clear\
+use  "Source_PAM_results_6540.dta"\
+merge 1:1 ID using "Source_data_repeated_ID_2250.dta" \
+keep if group=="V3"\
+rename datacluster cluster3\
+save "Source_data_fungal_enterotyp_T3.dta"\
+\
+\
+//PCOA Plot by enterotypes, n=4800
+\f1 \'a1\'a3
+\f0 \
+rm(list=ls())\
+library(readxl)\
+library("haven")\
+data1<-read_dta("Source_data_PCoA_plot_by_enterotypes_4800.dta")\
+data2 <- data1\
+t<-names(data2)\
+\
+start<-grep("^its_g2$",t)\
+end<-grep("^its_g644$",t)\
+data3<-data2[,c(1, start:end)]\
+data3 <- as.data.frame(data3)\
+row.names(data3) <- data3$ID\
+data3<-data3[,-1]\
+\
+library(vegan)\
+distance<-as.matrix(vegdist(data3, method = 'bray'))\
+distance <- as.data.frame(distance)\
+set.seed(123)\
+a1<-adonis2(data2[,c(start:end)]~as.factor(data2$cluster),permutations = 999, method = "bray"); a1\
+set.seed(123)\
+a2<-adonis2(data2[,c(start:end)]~as.factor(data2$group),permutations = 999, method = "bray"); a2\
+\
+pcoa <- cmdscale(as.dist(distance), k = 10, eig = T)   \
+pcoa$eig   \
+point <- data.frame(pcoa$point)   \
+pcoa_eig <- (pcoa$eig)[1:2] / sum(pcoa$eig)   \
+sample_site <- data.frame(\{pcoa$point\})[,1:2]   \
+\
+sample_site$names <- rownames(sample_site) \
+group <- data1[,c(1,2,3)]\
+names(group)[1] <- c('names')\
+\
+names(sample_site)[1:2] <- c('PCoA1', 'PCoA2')  \
+sample_site <- merge(sample_site, group, by = "names", all.x = TRUE) \
+sample_site$group <- factor(sample_site$cluster, labels = c("Can_type","Asp_type","Sacc_type")) \
+sample_site$group <- factor(sample_site$group, labels = c("T1","T2","T3")) \
+sample_site$group <- factor(sample_site$group, labels = c("T1","T2")) \
+library(plyr)\
+group_border <- ddply(sample_site, 'group', function(df) df[chull(df[[2]], df[[3]]), ]) \
+\
+library(RColorBrewer)\
+library(ggplot2)\
+library(grid)\
+library(lattice)\
+pcoa_plot <- ggplot(sample_site, aes(PCoA1, PCoA2, group = group)) +\
+  theme_classic() +\
+  geom_vline(xintercept = 0, color = 'black', size =0.3) +  \
+  geom_hline(yintercept = 0, color = 'black', size = 0.3) +\
+  stat_ellipse(level = 0.95, aes(color = group), show.legend = F,\
+               alpha = 0.8,size = 0.8)+ \
+  geom_point(aes(color = group), size = 0.5, alpha = 0.6) +  \
+  scale_color_manual(values = c("#377EB8", "#FF7F00", "skyblue1", "purple3", "lightskyblue", "pink", "#00AFBB", "#001959","#303030","#33CCCC", "#808080","#008686", "#FF9999")) + #
+\f1 \'bf\'c9\'d4\'da\'d5\'e2\'c0\'ef\'d0\'de\'b8\'c4\'b5\'e3\'b5\'c4\'d1\'d5\'c9\'ab
+\f0   \
+  scale_fill_manual(values = c("#00AFBB", "#33CCCC", "#FF99CC", "#505050", "#004686")) +  \
+  guides(fill = guide_legend(order = 2), \
+         shape = guide_legend(order = 2), \
+         color = guide_legend(order = 2),\
+         family="serif") +  \
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#808080")+\
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#005959")+ \
+\
+  theme(axis.line = element_line(size = 0.5),axis.title = element_text(size = 12),\
+        legend.text=element_text(size=12),panel.background = element_rect(color = 'white'))+ \
+  ##
+\f1 \'cc\'ed\'bc\'d3\'cd\'e2\'bf\'f2\'cf\'df
+\f0 \
+  labs(x = paste('PCoA axis1: ', round(100 * pcoa_eig[1], 2), '%'), \
+       y = paste('PCoA axis2: ', round(100 * pcoa_eig[2], 2), '%'),\
+       title = "")\
+pcoa_plot\
+ggsave(pcoa_plot, file="Figure_2b.pdf", width=5, height=4)\
+\
+*******driving genus analysis, for Figure_2c\
+clear\
+use "Source_data_fungi_RA_6540_for_PAM.dta"\
+merge 1:1 ID using "Source_PAM_results_6540.dta"\
+rename datacluster cluster\
+drop _merge\
+order ID id group cluster \
+\
+local i=0\
+foreach var of varlist its_g2-its_g644 \{\
+local i=`i'+1\
+\}\
+dis `i'   //
+\f1 \'ba\'cf\'bc\'c6
+\f0 643\
+\
+foreach var of varlist its_g2-its_g644 \{\
+sum `var'\
+if r(mean)<1\{ \
+drop `var' \
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist its_g2-its_g597 \{\
+local i=`i'+1\
+\}\
+dis `i'   //
+\f1 \'ba\'cf\'bc\'c6
+\f0 14\
+\
+foreach var of varlist its_g2-its_g597 \{\
+bysort cluster: egen mean_`var'=mean(`var')\
+\}\
+duplicates drop cluster, force\
+\
+\
+keep cluster mean_its_g2-mean_its_g597\
+\
+egen sum=rowtotal (mean_its_g2-mean_its_g597)\
+gen others=100-sum\
+\
+\
+************for Figure 2e\
+clear\
+use "Source_data_PCoA_plot_by_enterotypes_4800.dta"\
+\
+foreach var of varlist its_g2-its_g644 \{\
+count if `var'>0 \
+gen number_`var'= r(N)\
+gen prevalence_`var'= number_`var'/4800\
+drop `var' number_`var'\
+\}\
+keep if id=="0010202"\
+drop ID-batch  //for Probability density distribution plot\
+\
+****R code, for Figure 2e\
+data <- readxl::read_xlsx("Source_data_for_probability_density_distribution_plot.xlsx", sheet="20
+\f1 \'ba\'cb\'d0\'c4\'b0\'e6\'b1\'be
+\f0 ")\
+ggplot(data,aes(x=prevalence, colour=color))+geom_density(size=1, aes(linetype=color), alpha=0.25)+\
+  #geom_line(size=1)+\
+  theme_bw()  \
+  \
+//R code\
+data <- readxl::read_xlsx("Source_data_for_probability_density_distribution_plot.xlsx", sheet="20
+\f1 \'ba\'cb\'d0\'c4\'cc\'d8\'d0\'b4
+\f0 ")\
+\
+ggplot(data,aes(x=prevalence, colour=color))+geom_density(size=1, aes(linetype=color), alpha=0.25)+\
+  #geom_line(size=1)+\
+  scale_x_continuous(limits=c(0,1),breaks=seq(0.1,1,0.2))+\
+  theme_bw()  \
+\
+**global shift\
+*****beta diversity; Bray-curtis distance \
+######T1 T2 alteration figures\
+rm(list=ls())\
+library(readxl)\
+library("haven")\
+data1<-read_dta("Source_data_fungi_RA_for_pcoa_v1v2.dta")\
+data2 <- data1\
+t<-names(data2)\
+start<-grep("^its_g2$",t)\
+end<-grep("^its_g644$",t)\
+data3<-data2[,c(1, start:end)]\
+data3 <- as.data.frame(data3)\
+row.names(data3) <- data3$ID\
+data3<-data3[,-1]\
+library(vegan)\
+distance<-as.matrix(vegdist(data3, method = 'bray'))\
+distance <- as.data.frame(distance)\
+set.seed(123)\
+a2<-adonis2(data2[,c(start:end)]~as.factor(data2$group),permutations = 999, method = "bray"); a2\
+pcoa <- cmdscale(as.dist(distance), k = 10, eig = T)   \
+pcoa$eig   \
+point <- data.frame(pcoa$point)   \
+pcoa_eig <- (pcoa$eig)[1:2] / sum(pcoa$eig)   \
+sample_site <- data.frame(\{pcoa$point\})[,1:2]   \
+sample_site$names <- rownames(sample_site) \
+group <- data1[,c(1,2,4)]\
+names(group)[1] <- c('names')\
+names(sample_site)[1:2] <- c('PCoA1', 'PCoA2')  \
+sample_site <- merge(sample_site, group, by = "names", all.x = TRUE) \
+sample_site$group <- factor(sample_site$group, labels = c("T1","T2")) \
+\
+library(plyr)\
+group_border <- ddply(sample_site, 'group', function(df) df[chull(df[[2]], df[[3]]), ])  \
+library(RColorBrewer)\
+library(ggplot2)\
+library(grid)\
+library(lattice)\
+pcoa_plot <- ggplot(sample_site, aes(PCoA1, PCoA2, group = group)) +\
+  theme_classic() +\
+  geom_vline(xintercept = 0, color = 'black', size =0.3) +  \
+  geom_hline(yintercept = 0, color = 'black', size = 0.3) +\
+  stat_ellipse(level = 0.95, aes(color = group), show.legend = F,\
+               alpha = 0.8,size = 0.8)+ \
+  geom_point(aes(color = group), size = 0.5, alpha = 0.6) +  \
+  scale_color_manual(values = c("#377EB8", "#FF7F00", "skyblue1", "purple3", "lightskyblue", "pink", "#00AFBB", "#001959","#303030","#33CCCC", "#808080","#008686", "#FF9999")) + #
+\f1 \'bf\'c9\'d4\'da\'d5\'e2\'c0\'ef\'d0\'de\'b8\'c4\'b5\'e3\'b5\'c4\'d1\'d5\'c9\'ab
+\f0   \
+  scale_fill_manual(values = c("#00AFBB", "#33CCCC", "#FF99CC", "#505050", "#004686")) +  \
+  guides(fill = guide_legend(order = 2), \
+         shape = guide_legend(order = 2), \
+         color = guide_legend(order = 2),\
+         family="serif") +  \
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#808080")+\
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#005959")+ \
+  theme(axis.line = element_line(size = 0.5),axis.title = element_text(size = 12),\
+        legend.text=element_text(size=12),panel.background = element_rect(color = 'white'))+ \
+  labs(x = paste('PCoA axis1: ', round(100 * pcoa_eig[1], 2), '%'), \
+       y = paste('PCoA axis2: ', round(100 * pcoa_eig[2], 2), '%'),\
+       title = "")\
+pcoa_plot\
+ggsave(pcoa_plot, file="Figure_S1b.pdf", width=4, height=3)\
+\
+\
+#####T2 T3 alteration figures\
+ \
+rm(list=ls())\
+library(readxl)\
+library("haven")\
+data1<-read_dta("Source_data_fungi_RA_for_pcoa_v2v3.dta")\
+data2 <- data1\
+t<-names(data2)\
+\
+start<-grep("^its_g2$",t)\
+end<-grep("^its_g644$",t)\
+data3<-data2[,c(1, start:end)]\
+data3 <- as.data.frame(data3)\
+row.names(data3) <- data3$ID\
+data3<-data3[,-1]\
+\
+library(vegan)\
+distance<-as.matrix(vegdist(data3, method = 'bray'))\
+distance <- as.data.frame(distance)\
+set.seed(123)\
+a1<-adonis2(data2[,c(start:end)]~as.factor(data2$cluster),permutations = 999, method = "bray"); a1\
+set.seed(123)\
+a2<-adonis2(data2[,c(start:end)]~as.factor(data2$group),permutations = 999, method = "bray"); a2\
+\
+pcoa <- cmdscale(as.dist(distance), k = 10, eig = T)   \
+pcoa$eig   \
+point <- data.frame(pcoa$point)   \
+pcoa_eig <- (pcoa$eig)[1:2] / sum(pcoa$eig)   \
+sample_site <- data.frame(\{pcoa$point\})[,1:2]   \
+sample_site$names <- rownames(sample_site) \
+group <- data1[,c(1,2,4)]\
+names(group)[1] <- c('names')\
+names(sample_site)[1:2] <- c('PCoA1', 'PCoA2')  \
+sample_site <- merge(sample_site, group, by = "names", all.x = TRUE) \
+sample_site$group <- factor(sample_site$group, labels = c("T2","T3")) \
+library(plyr)\
+group_border <- ddply(sample_site, 'group', function(df) df[chull(df[[2]], df[[3]]), ])  \
+\
+library(RColorBrewer)\
+library(ggplot2)\
+library(grid)\
+library(lattice)\
+pcoa_plot <- ggplot(sample_site, aes(PCoA1, PCoA2, group = group)) +\
+  theme_classic() +\
+  geom_vline(xintercept = 0, color = 'black', size =0.3) +  \
+  geom_hline(yintercept = 0, color = 'black', size = 0.3) +\
+  stat_ellipse(level = 0.95, aes(color = group), show.legend = F,\
+               alpha = 0.8,size = 0.8)+  \
+  geom_point(aes(color = group), size = 0.5, alpha = 0.6) +  \
+  scale_color_manual(values = c("#FF7F00", "purple3", "skyblue1", "lightskyblue", "pink", "#00AFBB", "#001959","#303030","#33CCCC", "#808080","#008686", "#FF9999")) + #
+\f1 \'bf\'c9\'d4\'da\'d5\'e2\'c0\'ef\'d0\'de\'b8\'c4\'b5\'e3\'b5\'c4\'d1\'d5\'c9\'ab
+\f0   \
+  scale_fill_manual(values = c("#33CCCC", "#FF99CC", "#505050", "#004686")) +  \
+  guides(fill = guide_legend(order = 2), \
+         shape = guide_legend(order = 2), \
+         color = guide_legend(order = 2),\
+         family="serif") +  \
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#808080")+\
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#005959")+ \
+  theme(axis.line = element_line(size = 0.5),axis.title = element_text(size = 12),\
+        legend.text=element_text(size=12),panel.background = element_rect(color = 'white'))+ \
+  labs(x = paste('PCoA axis1: ', round(100 * pcoa_eig[1], 2), '%'), \
+       y = paste('PCoA axis2: ', round(100 * pcoa_eig[2], 2), '%'),\
+       title = "")\
+pcoa_plot\
+ggsave(pcoa_plot, file="Figure_S1c.pdf", width=4, height=3)\
+\
+*****Figure 3a\
+rm(list = ls())\
+library(ggplot2)\
+library(dplyr)\
+library(ggalluvial)\
+library("reshape2")\
+library(haven)\
+otu <- read_dta("Source_data_Sankey_T1T2_750.dta")\
+#otu <- read_dta("Source_data_Sankey_T2T3_750.dta" )\
+\
+\
+otu <- reshape2::melt(otu, id = 'value')\
+names(otu) <- c('value', 'type', 'detail')\
+type <- summary(otu$type)\
+otu$flow <- rep(1:type[1], length(type))\
+\
+\
+library(RColorBrewer)\
+display.brewer.pal(n=9, name='Set3') \
+colors=brewer.pal(n=6, name='Set3')[c(1,2,3)] \
+\
+color_metabolites <- c(c(brewer.pal(n=5, name='Set3')),'#008C5F')\
+color_cluster <- brewer.pal(n=6, name='Set2')\
+\
+\
+library(ggalluvial)\
+\
+otu <- as.data.frame(otu)\
+p <- ggplot(otu, aes(x = type, y = value,\
+                     stratum = detail, alluvium = flow, fill = detail)) +\
+  geom_stratum() +  \
+  geom_text(stat = 'stratum', infer.label = TRUE, size = 2.5)+   \
+  geom_flow()+  \
+  scale_fill_manual(values = c(color_cluster,color_cluster)) +  \
+  scale_x_discrete(limits = c('trimester1','trimester2' )) + \
+  # scale_y_continuous(expand = c(0, 0)) +\
+  labs(x = '', y = 'Number of participants') +  \
+  #coord_flip() +\
+  theme(legend.position = 'right', axis.line = element_line(),\
+        panel.background = element_blank())\
+p\
+ggsave(p, file="Figure_3a.pdf", width=3, height=4)\
+\
+**********alpha diversity dynamics\
+rm(list=ls())\
+data<-read_dta("Source_data_fungi_diversity_dynamics_total") \
+data<-read_dta("Source_data_fungi_diversity_dynamics_by_case.dta") \
+\
+data$group <- data$group\
+p <- ggplot(data, aes(x =as.factor(case2), y = its_observed_features))+ \
+  geom_boxplot(outlier.alpha = FALSE, outlier.size = 0, aes(fill=factor(group)),\
+               position = position_dodge(0.8),size=0.2) + \
+  scale_color_manual(values="#8DD3C7","#BEBADA", "#FB8072")+ #, "#80B1D3", "#FDB462", "#B3DE69", "#FCCDE5", "#D9D9D9", "#BC80BD")+ ##
+\f1 \'ca\'d6\'b6\'af\'c9\'e8\'d6\'c3\'d1\'d5\'c9\'ab\'a3\'ac\'c5\'e4\'ba\'cf\'c7\'b0\'c3\'e6
+\f0 colors
+\f1 \'b6\'a8\'d2\'e5
+\f0  "#CCEBC5", "#FFED6F"\
+  \
+  guides(fill=guide_legend(title="Trimester of pregnancy"))+\
+  theme_minimal()+\
+  theme(axis.title=element_text(size=23,face="plain",color="black"),\
+        axis.text = element_text(size=21,face="plain",color="black"),\
+        panel.background=element_rect(colour="black",fill=NA),\
+        panel.grid.minor=element_blank(),\
+        legend.position="right",\
+        legend.background=element_rect(colour=NA,fill=NA),\
+        axis.ticks=element_line(colour="black"))\
+\
+p <- p+theme(axis.line = element_line(size = 0.05))\
+p <- p+theme_classic() \
+p\
+ggsave(p, file="Figure_3b-d.pdf", width=4, height=3)\
+\
+\
+**********correlation analysis between changes in diet and decrease in richness\
+clear\
+use "Source_data_fungi_diversity_dynamics_total.dta"\
+keep id group its_observed_features\
+drop if group=="V2"\
+rename its_observed_features richness\
+reshape wide richness, i(id) j(group) string\
+gen delta_rich=richnessV3-richnessV1\
+\
+merge 1:1 id using "Source_data_change_in_diet_food_groups_from_T1_to_T3.dta"\
+\
+keep if _merge==3\
+drop _merge\
+drop if fd_c_rice=="NA"\
+drop if fd_c_mantou=="NA" \
+drop if fd_c_noodle=="NA" \
+drop if fd_c_vege=="NA" \
+drop if fd_c_meat=="NA" \
+drop if fd_c_egg=="NA" \
+drop if fd_c_milkpro=="NA" \
+drop if fd_c_fruit=="NA"\
+\
+destring fd_c_rice, replace\
+spearman fd_c_rice delta_rich\
+\
+destring fd_c_mantou, replace\
+spearman fd_c_mantou delta_rich\
+\
+destring fd_c_noodle, replace\
+spearman fd_c_noodle delta_rich\
+\
+destring fd_c_vege, replace\
+spearman fd_c_vege delta_rich\
+\
+destring fd_c_meat, replace\
+spearman fd_c_meat delta_rich\
+\
+destring fd_c_egg, replace\
+spearman fd_c_egg delta_rich\
+\
+\
+destring fd_c_milkpro, replace\
+spearman fd_c_milkpro delta_rich\
+\
+destring fd_c_fruit, replace\
+spearman fd_c_fruit delta_rich\
+\
+merge 1:1 id using "Source_data_time_interval_between_sample_collection_T1T3.dta"\
+keep if _merge==3\
+drop _merge\
+merge 1:1 ID using "Source_data_basic_covariates.dta"\
+keep if _merge==3\
+drop _merge\
+\
+regress delta_rich fd_c_rice fd_c_mantou fd_c_noodle fd_c_vege fd_c_meat fd_c_egg fd_c_milkpro fd_c_fruit time13 age preBMI parity gravidity\
+\
+\
+\
+****Figure_4a; intra-individual dissimilarity (T1-T3); Probability density distribution plot\
+rm(list=ls())\
+library("ggplot2")\
+library(readxl)\
+library("haven")\
+data<-read_dta("Source_data_fungi_bacteria_intra_individual_distance.dta")\
+ggplot(data,aes(x=distance, colour=color))+geom_density()+\
+  theme_bw() \
+\
+ggplot(data,aes(x=distance, colour=color, linetype=type))+geom_density()+\
+  theme_bw() \
+\
+p <- ggplot(data,aes(x=distance, colour=color, linetype=type))+geom_density(aes(fill=color), size=0.4, alpha=0.25)+\
+  theme_bw();p \
+p <- p+theme_classic();p\
+ggsave(p, file="Figure_4a.pdf", width=4, height=3)\
+\
+\
+******association analysis between pre-pregnancy BMI and intra-individual alterations from T1 to T3. \
+ \
+clear\
+use "Source_data_ITS_basleline_overweight_information_1059.dta" \
+merge 1:1 ID using "Source_data_fungi_V1V3_bray_distance.dta"\
+keep if _merge==3\
+drop _merge\
+gen weight=2 if macrosomia ==1\
+replace weight=0 if lowbirthwt ==1\
+replace weight =1 if weight ==.\
+\
+merge 1:1 ID using "Source_data_sample_collection_interval.dta"\
+keep if _merge==3\
+drop _merge\
+//drop if overweight ==0\
+merge 1:1 id using "Source_data_healthy_status.dta"\
+keep if _merge==3\
+drop _merge\
+summarize preBMI\
+gen z_preBMI=(preBMI-r(mean))/r(sd)\
+regress v1_v3_intraindividual_distance age parity z_preBMI time13 healthy_preg no_antibiotic_use_a\
+\
+******Figure 4b, intra-individual dissimilarity by pre-pregnancy overweight status.\
+rm(list=ls())\
+library("RColorBrewer")\
+library(readr)\
+display.brewer.pal(n=8, name='Set3')  \
+set.seed(120)\
+colors=brewer.pal(n=8, name='Set2')[c(1,6)] \
+library(readxl)\
+data1<-read_dta("Source_data_intra_individual_distance_by_pre_pregnancy_overweight.dta")\
+\
+library(tidyverse)\
+theme_boxplot <- theme(panel.background=element_rect(fill="white",colour="black",size=0.25),\
+                       axis.line=element_line(colour="black",size=0.3),\
+                       axis.title=element_text(size=6,face="plain",color="black"),\
+                       axis.text = element_text(size=6,face="plain",color="black"),\
+                       legend.position="none")\
+\
+library("ggplot2")\
+ \
+p1 <- ggplot(data=data1, aes(as.factor(overweight), v1_v3_intraindividual_distance)) +\
+  geom_boxplot(aes(fill = as.factor(overweight)), outlier.shape = NA, notch = FALSE) +\
+  geom_jitter(binaxis = "y", position = position_jitter(0.2), stackdir = "center", size = 0.05) +\
+  scale_fill_manual(values=c("#8DD3C7","#BEBADA", "#FB8072"))+ \
+  theme_classic() + theme_boxplot; p1\
+ggsave(p1, file="Figure_4b.pdf", width=3, height=4)\
+\
+\
+********loss rate analysis Figure 4c\
+rm(list=ls())\
+library("ggplot2")\
+library(readxl)\
+library("haven")\
+data <- readxl::read_xlsx("Source_data_for_figure_4c.xlsx", sheet="Sheet1")\
+p<-ggplot(data=data,aes(x=genus,y=count_frequency,fill=genus))+geom_bar(aes(fill=component),stat="identity",color="black");p \
+p+coord_polar()\
+p+coord_polar()+ylim(0,750)\
+p<-ggplot(data=data,aes(x=reorder(genus,order),y=count_frequency,fill=genus))+\
+  theme(axis.text = element_text(size = 12))+\
+  geom_bar(aes(fill=component),stat="identity",color="black"); p\
+p <- p+coord_polar();p\
+p <- p+theme(axis.line = element_line(size = 0.2),axis.title = element_text(size = 4),\
+             legend.title=element_text(size=2), legend.text=element_text(size=0.4), axis.text = element_text(size = 3, color="black"),\
+             legend.position=("top"), panel.background = element_blank(),panel.grid.major = element_line(color="grey", size=0.2)); p #
+\f1 \'b5\'f7\'d5\'fb\'d7\'f8\'b1\'ea\'d6\'e1\'bf\'f2\'cf\'df\'b5\'c4\'bf\'ed\'b6\'c8
+\f0 \
+ggsave(p, file="Figure_4c.pdf", width=4, height=3)\
+\
+\
+\
+\
+****Paired t test on CLR-transformed data to identify altered individual genera between from T1 to T3 within the sub-cohort.\
+*****CLR transformation, and paired t test, for Figure_4e, this analysis was performed for those genera that are present at both T1 and T3. \
+clear\
+use "Source_data_T1T2_fungi_for_prediction_model.dta"\
+******drop those gut fungus which was not present at T1 or T3 (prevalence=0 at both timepoint)\
+\
+foreach var of varlist g2-g644 \{\
+count if `var'>0 \
+if r(N)<1\{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist g2-g644 \{\
+local i=`i'+1\
+\}\
+dis `i'   //
+\f1 \'ba\'cf\'bc\'c6
+\f0 465\
+save "Soure_data_gut_fungi_data_for_CLR_transformation_and_paired_t_test.dta"  \
+\
+\
+\
+\
+clear\
+use "Soure_data_gut_fungi_data_for_CLR_transformation_and_paired_t_test.dta"  \
+keep if group=="V1"\
+gen id=substr(ID, 4, 7)\
+order ID id\
+save "Soure_data_gut_fungi_data_for_CLR_transformation_and_paired_t_test_T1.dta" \
+\
+\
+\
+clear\
+use "Soure_data_gut_fungi_data_for_CLR_transformation_and_paired_t_test.dta"  \
+foreach var of varlist g2-g644 \{\
+rename `var' `var'_V3\
+\}\
+save "Soure_data_gut_fungi_data_for_CLR_transformation_and_paired_t_test_T3.dta" \
+\
+*****The data were CLR transformed in the R software using "composition" function. \
+\
+clear\
+use "Source_data_CLR_transformed_T1.dta" \
+merge 1:1 id using "Source_data_CLR_transformed_T3.dta" \
+foreach var of varlist g2-g644 \{\
+\
+ttest `var'=`var'_v3\
+gen `var'_t=r(t)\
+order `var'_t\
+\}\
+**the t value as well as the pvalue were summarized in the "Source_data_paired_ttest_p_values" excel file. \
+\
+\
+\
+***********We used a machine learning algorithm (Light GBM) to discriminate T1 and T3 samples based on the gut mycobiome composition **Figure_4d\
+******Python code was provided in a separte file. \
+\
+****serum metabolome alterations from T1, T2 to T3. \
+\
+rm(list=ls())\
+library(readxl)\
+library("haven")\
+data1<-read_dta("Source_data_repeatedly_measured_serum_metabolome_2157.dta")\
+data2 <- data1\
+t<-names(data2)\
+\
+start<-grep("^z_medp1307$",t)\
+end<-grep("^z_medn0074$",t)\
+data3<-data2[,c(1, start:end)]\
+data3 <- as.data.frame(data3)\
+row.names(data3) <- data3$ID\
+data3<-data3[,-1]\
+\
+library(vegan)\
+distance<-as.matrix(vegdist(data3, method = 'canberra'))\
+distance <- as.data.frame(distance)\
+set.seed(123)\
+a1<-adonis2(data2[,c(start:end)]~as.factor(data2$cluster),permutations = 999, method = "canberra"); a1\
+set.seed(123)\
+a2<-adonis2(data2[,c(start:end)]~as.factor(data2$group),permutations = 999, method = "canberra"); a2\
+\
+pcoa <- cmdscale(as.dist(distance), k = 10, eig = T)   \
+pcoa$eig  \
+point <- data.frame(pcoa$point)  \
+pcoa_eig <- (pcoa$eig)[1:2] / sum(pcoa$eig)   \
+sample_site <- data.frame(\{pcoa$point\})[,1:2]   \
+sample_site$names <- rownames(sample_site) \
+group <- data1[,c(1,2,3)]\
+names(group)[1] <- c('names')\
+names(sample_site)[1:2] <- c('PCoA1', 'PCoA2') \
+sample_site <- merge(sample_site, group, by = "names", all.x = TRUE) \
+sample_site$group <- factor(sample_site$group, labels = c("T1","T2","T3")) \
+sample_site$outcome <- factor(sample_site$outcome, labels = c("H","P", "M")) \
+library(plyr)\
+group_border <- ddply(sample_site, 'group', function(df) df[chull(df[[2]], df[[3]]), ])  \
+\
+library(RColorBrewer)\
+library(ggplot2)\
+library(grid)\
+library(lattice)\
+pcoa_plot <- ggplot(sample_site, aes(PCoA1, PCoA2, group = group)) +\
+  theme_classic() +\
+  geom_vline(xintercept = 0, color = 'black', size =0.3) +  \
+  geom_hline(yintercept = 0, color = 'black', size = 0.3) +\
+  stat_ellipse(level = 0.95, aes(color = group), show.legend = F,\
+               alpha = 0.8,size = 0.8)+ \
+  geom_point(aes(color = group), size = 0.5, alpha = 0.8) +  \
+  scale_color_manual(values = brewer.pal(4,"Set2")) +\
+  scale_y_continuous(limits=c(-0.3,0.25),breaks=seq(-0.3,0.25,0.1))+\
+  scale_x_continuous(limits=c(-0.4,0.5),breaks=seq(-0.4,0.5,0.1))+\
+  scale_fill_manual(values = c("#00AFBB", "#33CCCC", "#FF99CC", "#505050", "#004686")) +  \
+  guides(fill = guide_legend(order = 2), \
+         shape = guide_legend(order = 2), \
+         color = guide_legend(order = 2),\
+         family="serif") +  \
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#808080")+\
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#005959")+ \
+  theme(axis.line = element_line(size = 0.5),axis.title = element_text(size = 12),\
+        legend.text=element_text(size=12),panel.background = element_rect(color = 'white'))+ \
+ \
+  labs(x = paste('PCoA axis1: ', round(100 * pcoa_eig[1], 2), '%'), \
+       y = paste('PCoA axis2: ', round(100 * pcoa_eig[2], 2), '%'),\
+       title = "")\
+\
+pcoa_plot\
+ggsave(pcoa_plot, file="Figure_5b.pdf", width=4, height=3)\
+\
+***** explained variance of serum metabolom by pregnancy trimesters. \
+rm(list=ls())\
+library(readxl)\
+library("haven")\
+data1<-read_dta("Source_data_Amino_acids_705_PAMcluster.dta") //here is an example of sub-class\
+data2 <- data1\
+t<-names(data2)\
+\
+start<-grep("^z_medp1465$",t)\
+end<-grep("^z_medp2066$",t)\
+data3<-data2[,c(1, start:end)]\
+data3 <- as.data.frame(data3)\
+row.names(data3) <- data3$ID\
+data3<-data3[,-1]\
+\
+library(vegan)\
+#distance<-as.matrix(vegdist(data3, method = 'euclidean'))\
+#distance<-as.matrix(vegdist(data3, method = 'bray'))\
+distance<-as.matrix(vegdist(data3, method = 'canberra'))\
+distance <- as.data.frame(distance)\
+#write.table(cbind(rownames(distance), distance), 'distance_pdi.txt', row.names = F, sep = '\\t', quote = F)\
+#write.table(distance,file = "distance_bacteria.txt")\
+##no covariates  \
+a11<-adonis2(data2[,c(start:end)]~as.factor(data2$cluster),permutations = 999, method = "canberra"); a11\
+a11<-adonis2(data2[,c(start:end)]~as.factor(data2$group),permutations = 999, method = "canberra"); a11\
+\
+****Figure_5c\
+rm(list=ls())\
+library(ggpubr)\
+library(ggplot2)\
+df <- readxl::read_xlsx("Source_data_figure_5c.xlsx",sheet = "Sheet1")\
+p1 <- ggdotchart(df, \
+                 x = colnames(df)[1],\
+                 y = colnames(df)[2],\
+                 color = colnames(df)[1],\
+                 rotate=TRUE,  \
+                 palette = c("#8DD3C7", "#FDB462", "#FB8072", "#B96600", "#80B1D3", "#BEBADA", "#FCCDE5", "#B3DE69","#BC80BD", "darkseagreen3","#FFED6F","#CCEBC5","#FFFF66","#D9D9D9"), # 
+\f1 \'d0\'de\'b8\'c4\'d1\'d5\'c9\'ab
+\f0 \
+                 sorting = "descending",               \
+                 add = "segments",               \
+                 dot.size = 10,                  \
+                 add.params = list(color = "lightgray", size = 5),   \
+                 position = position_dodge(0.1),                     \
+                 label = round(df[[2]]),                             \
+                 font.label = list(color = "white",                 \
+                                   size = 0, \
+                                   vjust = 0.5)\
+);p1\
+ggsave(p1, file="Figure_5c.pdf", width=10, height=6)\
+\
+\
+****network analysis _ gerated data for Figure_5a\
+\
+clear\
+use "Source_data_network_analysis_pathway_enterotyps_1039.dta" \
+local i=0\
+foreach var of varlist p1-p623 \{\
+local i=`i'+1\
+\}\
+dis `i'   // \
+\
+drop p1 p2\
+\
+\
+foreach var of varlist p3-p623 \{\
+sum `var'\
+if r(mean)<0.0001\{  \
+drop `var' \
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist p5-p623 \{\
+local i=`i'+1\
+\}\
+dis `i'    \
+\
+ \
+foreach var of varlist p5-p623 \{\
+count if `var'>0 \
+if r(N)<104\{\
+drop `var'\
+\}\
+\}\
+\
+local i=0\
+foreach var of varlist p5-p623 \{\
+local i=`i'+1\
+\}\
+dis `i'    \
+\
+*****K-W test  to identify pathways which are significantly different across different fungal enterotypes\
+\
+drop if no_antibiotic_use_a ==0  \
+tempname coef\
+tempfile res\
+\
+postfile `coef'  str20(var) double(chi2) using "`res'", replace\
+foreach pathway of varlist p5-p623 \{\
+\
+kwallis  `pathway', by (datacluster) // \
+\
+post `coef' ("`pathway'") (`r(chi2)')  \
+\}\
+\
+postclose `coef'\
+preserve\
+use "`res'", clear\
+export excel using "KW_results", sheetreplace firstrow(variables)\
+restore\
+\
+\
+\
+****We fitted multivariate regression models to examine the associations of identified pathways with host serum metabolites. Here, we adjusted for potential confounders including age, gestation week, parity and pre-pregnancy BMI. \
+*****Both the fungi and pathway data were standardized using z-score before the regression analysis.\
+clear\
+use "Source_data_baseline_metagenomics_functional_pathway_RA_rawdata.dta"\
+keep id p196 p347 p34 p451 p342 p561 p147 p374\
+\
+gen ID="V1_"+id\
+order ID id\
+merge 1:1 id using "Source_data_serum_metabolome_T1.dta"\
+keep if _merge==3 //\
+drop _merge\
+keep ID-lowbirthwt medp0089	medp1491	medp2068	medp2522	medp0601	medp0765	medp1795	medp0084	medp1907	medp2524	medp1465	medp1741	medn1125	medp1740	medp2066	medn1224	medp1645	medp0128	medp2436	medp1212	medp1476	medp1194	medp1464	medp1197	medp2334	medp1052	medp1002	medp2374	medp2038	medp2553	medp1067	medn1171	medn2059	medn0682	medp1196	medn1895	medn0038	medn1950	medp2391	medp1888	medp2488	medp1894	medn1954	medp2267	medn1995	medp0071	medp2411	medp2131	medp2563	medp2634	medp1966	medp0519	medp1742	medn0012	medn1691	medp2588	medp2582	medp2327	medp0868	medn1029	medp0878	medn0616	medp2451	medp1921	medn2142	medp0326	medp0891	medn1689	medn0066	medn0843	medn1949	medp2312	medp2558	medp2382	medp0058	medp2357	medp2508	medp0637	medp2307	medn0009	medp2371	medn1066	medp2365	medp2542	medp2505	medn1639	medp2474	medp2003	medn1910	medp2378	medp2416	medp1509	medp1776	medp2355	medn0033	medp0297	medp2565	medp2383	medp2584	medp1662	medn0496	medn1306	medn0061	medp1962	medn0047	medp1928	medp2367	medp1935	medn2100	medp0611	medn1861	medn1404	medp0087	medn1917	medp1866	medn1925	medp2320	medn0015	medp2504	medp0066	medn1620	medp1506	medp2432	medp0064	medn1992	medp0062	medp2566	medp1307	medp0026	medp2494	medn0041	medp1512	medp1926	medp1177	medp1663	medn1927	medn1521	medn1478	medp2468	medn1969	medn1640	medp0404	medp1933	medp0013	medp2348	medp2329	medn2140	medn2107	medn0045	medp1996	medp2433	medp1919	medp1511	medp2514	medp2394	medp1780	medp0022	medp0083	medn0579	medp2313	medp2493	medp1914	medn1914	medn1942	medp2597	medn0439	medp2318	medp0059	medn0420	medn0062	medn0051	medn0056	medn1991	medp2387	medp1885	medn0022	medp2529	medn0067	medn1564	medp2585	medn0827	medp1682	medp1923	medp2555	medn0816	medp2446	medn1615	medp2572	medp0011	medn2024	medp2037	medp2560	medn0018	medn1709	medp0880	medp2428	medp0685	medp1670	medn2002	medn1410	medp0299	medp1842	medp2413	medn1548	medn2135	medp1916	medp2587	medn0429	medn0010	medp2333	medn1246	medn0322	medp2554	medp1889	medp2571	medp1863	medp2396	medn0063	medp0020	medn1960	medp2376	medn0323	medn0006	medn0005	medp2569	medp2431	medn0074	medp1061	medn1970	medp0006	medn1918	medp1913	medp2351	medn2007	medn0042	medn0586	medp0147	medp2386	medp2335	medp1973	medp1942	medp2084	medp0068	medp2001	medn0662	medp2426	medp0045	medn0007	medp2556	medp1750	medn0019	medp2005	medn0068	medp1986	medn2027	medp1859	medn1681	medp2528	medp1356	medp0007	medn2103	medp1911	medp2339	medp1508	medp0387	medp1360	medn1518	medn0065	medp0012	medp2425	medp1126	medn1686	medp2550	medp1507	medp1963	medp1679	medp2031	medn0046	medn1979	medn1859	medn1706	medp0892	medn1606	medn1853	medn1511	medn1909	cmpf_n	medp0668	medn1745	medp2408	medn2196	medn0852	medp1822	medp2142	medp1234	medn2178	medp0101	medn0739	medp2643	medn1624	medp1242	medn1092	medn1735	medn2195	medn0647	medn0649	medp0114	medn0745	medn1747	mwxq04_n	medn0554	medn0085	medn1858	medn1206	medn1231	medp2219	medp2104	medn1802	medn0086	medp2113	medp2089	medn1661	medp0745	medp0507	medp0669	medp1898	medn1821	medp2633	medn1837	medp1803	medp0370	medn1794	medp2285	medn2197	b024952_p	medp2139	medp2245	medn0097	medn0729	medn2050	medn1900	medn0105	medp2672	medn0106	medn0115	medn0110	medn1902	medn0113	medn1329	medn1141	medn1413	medn0109	medn1862	medn1906	medn1899	medn0107	medn1904	medn2101	medn0231	medn0240	medn0502	medn0229	medn1532	medp2359	medn1576	medn0463	medp1011	medn0461	medn1935	medp0227	medn1931	hmpp0004	medp0236	medn0237	medn0485	medn0506	medp1844	medp0135	medn1057	medn2102	medp0119	medp1705	medp0250	medp0251	medn0245	medp0242	medp1737	medp0389	medn1015	medp1402	medn1812	medn0348	medn1148	medp1444	medp2143	medp1414	medp1411	medp1434	medp1400	medn0385	medp1441	medn1461	medn1069	medn1608	medn0398	medp0510	medp1386	medp1516	medp1398	medn1854	medp1917	medp1421	medp1412	medn0604	medp1419	medp1289	medp1373	medn0381	medn1817	medp1428	medp1387	medp1901	medp1394	medp1391	medp1424	medp1395	medp1418	medp2197	medn0390	medp1407	medp1440	medp1530	medp1417	medn1840	medp1518	medp1528	medn0399	medp1430	medp1399	medp1431	medn0311	medp1514	medn0383	medp1442	medn1159	medp1408	medn0763	medp1458	medp1433	medp1416	medp1529	medn1082	medp1409	medn0350	medn1035	medn1041	medn0378	medp1656	medp1084	medp1389	medn0685	medp1427	medn1406	medp1665	medp1422	medp1410	medp0523	medp1526	medn2207	medn0765	medn0807	medp1461	medn1805	medp1392	medn1688	medp2230	medn1426	medp1404	medp1385	medp2261	medn0751	medp1432	medn0769	medp1406	medn1428	medn0658	medn1081	medn0494	medn0376	medp1405	medp1401	medp1397	medp1700	medn1272	medp1328	medn1273	medn0372	medn1285	medp1904	medp1339	medp1695	medn0360	medp0638	medn1279	medp1326	medp1875	medp1691	medp1692	medp1341	medn1643	medn1276	medn0370	medn1692	medp1334	medn1287	medp1166	medp1659	medn0362	medn1278	medp0338	medn1265	medp1096	medp1693	medp1221	medp1348	medn1269	medp1345	medp1657	medp1343	medn1267	medn1597	medn1282	medp1658	medn1600	medp1318	medp1068	medp0336	medp1331	medp0434	medp1322	medp1321	medp1686	medn0368	medp1472	medn0261	medn1484	medp1479	medn1656	medp1786	medn0562	medp2349	medn1412	medn0621	medp1060	medp0883	medn0266	medp2145	medn0099	medp2364	medp1211	medp0115	medp2523	medp0270	medn1710	medn0098	medp2342	medn1649	medn1247	medp0453	medp1900	medp2375	medn0523	medp2412	medp1127	medn1551	medp0890	medp0821	medp0898	medp0529	medp2092	medn1022	medp2685	medn1150	medp2133	medp1982	medp1635	medp1629	medp2256	medp0889	medp1687	medp1628	medp1272	medp1120	medp0184	medp1637	medn0611	medp2044	medp1655	medp0550	medn0547	medn1486	medn0179	medp1624	medp1500	medp1638	medp2613	medn0536	medp2059	medn1613	medn0208	medp1639	medp1643	medp0174	medp1654	medn0421	medn0156	medp0526	medp2405	medn0445	medp0165	medn0568	medn0171	medn1506	medp0151	medp1959	medp1787	medp1072	medp1498	medn0444	medn0533	medp1100	medp0154	medn0431	medp1161	medp0401	medp1093	medn1003	medn1675	medp1958	medp1954	medp0881	medn1501	medn0140	medp0378	medp0157	medp0888	medp2368	medp1949	medp1749	medp2326	medp0159	medn0434	medp2540	medn0160	medn0609	medp0177	medp0150	medp0156	medn0163	medp1719	medp2439	medp0148	medp0160	medp1717	medp1713	medn0101	medn0419	medn1513	medp0178	medn0147	medn1648	medn1520	medn0528	medn0286	medp0313	medp0296	medn0499	medn1315	medn1566	medn1690	medp2176	medp0518	medp0321	medn1155	medn1395	medp0305	medn0659	medn1493	medp1802	medn1554	medn0555	medn0344	medn0551	medn1492	medp2266	medn1400	medn2028	medn0282	medn1699	medn0238	medn0201	medn1320	medp1488	medn1299	medp2283	medn0317	medn1504	medn0432	medn1235	medn0301	medp0576	medn0343	medn1006	medn0340	medn0741	medn0589	medn0333	medn2091	medn1326	medn1621	medn0202	medn0826	medp0357	medn1856	medn1880	medn0338	medp0627	medp0395	medp2064	medn1589	medn2009	medn2063	medp1857	medn0290	medn0297	medn2096	medn0299	medp1132	medn1335	medn1721	medn0325	medn0820	medn2094	medn1722	medn1792	medp0325	medn1498	medp1217	medp2281	medn1488	medn1009	medp1006	medp2347	medn0622	medp0295	medp0307	medn0478	medp2088	medn1098	medp2109	medp0535	medp2024	medn0294	medn1005	medp0509	medn1965	medn2023	medn1162	medp0069	medn1886	medn1311	medn1502	medn0300	medp0874	medn1056	medn1398	medp0823	medn0280	medp1247	medp2108	medn0342	medp2223	medp0039	medp1076	medp0871	medp2241	medp1698	medp1243	medp0125	medn0209	medp0081	medp1255	medp1045	medp0442\
+\
+\
+local i=0\
+foreach var of varlist medp1307-medn0074 \{\
+local i=`i'+1\
+\}\
+dis `i'  // 794\
+\
+merge 1:1 ID using "Source_data_basic_covariates.dta"\
+drop if _merge==2  \
+\
+\
+drop _merge\
+merge 1:1 ID using "Source_data_gestational_week_data.dta" \
+drop if _merge==2  \
+\
+drop _merge\
+merge 1:1 ID using "Source_data_baseline_overweight_antibiotics_1059.dta" \
+drop if _merge==2  \
+\
+\
+foreach var of varlist medp1307-medn0074 \{\
+summarize `var'\
+replace `var'=(`var'-r(mean))/r(sd)\
+\}\
+\
+foreach var of varlist p34-p561 \{\
+summarize `var'\
+replace `var'=(`var'-r(mean))/r(sd)\
+\}\
+ \
+\
+drop if no_antibiotic_use_a ==0  \
+\
+tempname regress\
+tempfile res\
+postfile `regress' str20(metabolites pathway) double(n b se lb ub p) using "`res'", replace\
+\
+foreach metabolites of varlist medp1307-medn0074 \{\
+foreach pathway of varlist p34-p561 \{\
+\
+regress `metabolites' age preBMI i.parity `pathway' week i.no_antibiotic_use_a // gravidity\
+post `regress' ("`metabolites'")  ("`pathway'")  (`e(N)') (_b[`pathway']) (_se[`pathway'])  (_b[`pathway']-1.96*_se[`pathway']) (_b[`pathway']+1.96*_se[`pathway']) (chi2tail(1,(_b[`pathway']/_se[`pathway'])^2))    \
+\}\
+\}\
+\
+postclose `regress'\
+preserve\
+use "`res'", clear\
+export excel using "pathway_and_metaboliets_associations.xlsx", sheetreplace firstrow(variables)\
+restore\
+\
+\
+********correlation between core gut fungi and metabolites, Figure_5d, heatmap\
+ \
+clear\
+use "Source_data_ITS_unfiltered_RA_after_clr_delta.dta" \
+merge 1:1 id using "Source_data_metabolome_delta31_rawdata.dta" \
+keep if _merge==3\
+keep id g2 g20 g45 g110 g111 g112 g116 g196 g198 g203 g223 g229 g232 g237 g561 g596 g597 g609 g630 g633 \
+\
+merge 1:1 id using "Source_data_metabolome_T3T1_delta_709.dta" \
+\
+tempname coef\
+tempfile res\
+\
+postfile `coef'  str20(var score) double(n rho p) using "`res'", replace\
+foreach metabolites of varlist medp1307-medn0074 \{\
+foreach genus of varlist g2-g633\{\
+\
+spearman `metabolites' `genus' // \
+post `coef' ("`metabolites'")  ("`genus'") (`r(N)') (`r(rho)') (`r(p)')\
+\}\
+\}\
+postclose `coef'\
+preserve\
+use "`res'", clear\
+export excel using "core20_CLR_delta_and_metabolites_associations", sheetreplace firstrow(variables)\
+restore\
+\
+****data cleaning for heatmap figure_5d\
+clear\
+import excel "core20_CLR_delta_and_metabolites_associations.xls", sheet("Sheet1") firstrow\
+keep if var=="medn1426" |	var=="medn0429" |	var=="medn0826" |	var=="medn1141" |	var=="medn1521" |	var=="medn1162" |	var=="medn1927" |	var=="medp0518" |	var=="medn1041" |	var=="medp1973" |	var=="medp0068" |	var=="medn1853" |	var=="medp1628" |	var=="medn1035" |	var=="medp1512" |	var=="medn1689" |	var=="medp1272" |	var=="medp0184" |	var=="medp0338" |	var=="medn0376" |	var=="medn1081" |	var=="medn1246" |	var=="medp1432" |	var=="medn0012" |	var=="medn1640" |	var=="medn0019" |	var=="medn0018" \
+keep if score=="g2" | score=="g633" | score=="g20" | score=="g112"  | score=="g110"  | score=="g630"   \
+keep var score rho FDR\
+\
+\
+//alterations of serum metabolom straitified by pre-pregnancy overweight status. Figure 6a-b\
+rm(list=ls())\
+library(readxl)\
+library("haven")\
+data1<-read_dta("Source_data_serum_metabolom_alteration_by_prepregnancy_overweight.dta")\
+data2 <- data1\
+t<-names(data2)\
+\
+start<-grep("^medp1307$",t)\
+end<-grep("^medn0074$",t)\
+\
+data3<-data2[,c(1, start:end)]\
+data3 <- as.data.frame(data3)\
+row.names(data3) <- data3$ID\
+data3<-data3[,-1]\
+\
+library(vegan)\
+distance<-as.matrix(vegdist(data3, method = 'canberra'))\
+distance <- as.data.frame(distance)\
+set.seed(123)\
+a1<-adonis2(data2[,c(start:end)]~as.factor(data2$overweight),permutations = 999, method = "canberra"); a1\
+\
+pcoa <- cmdscale(as.dist(distance), k = 10, eig = T)   \
+pcoa$eig   \
+point <- data.frame(pcoa$point)   \
+pcoa_eig <- (pcoa$eig)[1:2] / sum(pcoa$eig)   \
+sample_site <- data.frame(\{pcoa$point\})[,1:2]  \
+sample_site$names <- rownames(sample_site) \
+group <- data1[,c(1,2,3)]\
+names(group)[1] <- c('names')\
+names(sample_site)[1:2] <- c('PCoA1', 'PCoA2')  \
+sample_site <- merge(sample_site, group, by = "names", all.x = TRUE) \
+sample_site$group <- factor(sample_site$overweight, labels=c("under","normal", "over")) \
+library(plyr)\
+group_border <- ddply(sample_site, 'group', function(df) df[chull(df[[2]], df[[3]]), ])  \
+library(RColorBrewer)\
+library(ggplot2)\
+library(grid)\
+library(lattice)\
+pcoa_plot <- ggplot(sample_site, aes(PCoA1, PCoA2, group = group)) +\
+  theme_classic() +\
+  geom_vline(xintercept = 0, color = 'black', size =0.3) +  \
+  geom_hline(yintercept = 0, color = 'black', size = 0.3) +\
+  stat_ellipse(level = 0.95, aes(color = group), show.legend = F,\
+               alpha = 0.8,size = 0.8)+ \
+  geom_point(aes(color = group), size = 0.5, alpha = 0.8) +  \
+  #display.brewer.pal(n=6, name='Set2')  \
+  #colors=brewer.pal(n=6, name='Set3')[c(1,2,3)]  \
+  scale_color_manual(values = brewer.pal(n=6, name='Set2')[c(2,3,1)]) +   \
+  scale_y_continuous(limits=c(-0.2,0.25),breaks=seq(-0.2,0.25,0.1))+\
+  scale_x_continuous(limits=c(-0.4,0.4),breaks=seq(-0.4,0.4,0.2))+\
+  #scale_fill_manual(values = c("#00AFBB", "#33CCCC", "#FF99CC", "#505050", "#004686")) +  \
+  guides(fill = guide_legend(order = 2), \
+         shape = guide_legend(order = 2), \
+         color = guide_legend(order = 2),\
+         family="serif") +  \
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#808080")+\
+  annotate("text",x=0.45,y=0.45,parse=TRUE,size=0.45,label="",family="serif",\
+           fontface="italic",colour="#005959")+ \
+  theme(axis.line = element_line(size = 0.5),axis.title = element_text(size = 12),\
+        legend.text=element_text(size=12),panel.background = element_rect(color = 'white'))+ \
+ \
+  labs(x = paste('PCoA axis1: ', round(100 * pcoa_eig[1], 2), '%'), \
+       y = paste('PCoA axis2: ', round(100 * pcoa_eig[2], 2), '%'),\
+       title = "")\
+pcoa_plot\
+#install.packages("ggExtra")\
+library(ggExtra)\
+plot2<-ggExtra::ggMarginal(pcoa_plot, type = "boxplot", groupColour = T, groupFill = TRUE, size=5); plot2\
+\
+*******clinical impact\
+*********gut fungi and pregnancy complications; gut fungi and adverse birth outcomes\
+\
+****gut fungi and GDM\
+clear\
+use "Source_data_fungi_birthoutcomes_mediation_4800.dta" //the RA of gut fungi had been z-standardized (z-score)\
+\
+drop if gdm_preg==. //4606\
+tab preterm //4656\
+drop if preBMI==.\
+\
+drop if gdm_preg==.\
+\
+logistic macrosomia age preBMI i.parity i.gdm_preg //  //c'\
+logistic preterm age preBMI i.parity i.gdm_preg //  //c'\
+logistic lowbirthwt age preBMI i.parity i.gdm_preg //  //c'\
+\
+\
+logistic macrosomia age preBMI i.parity i.pih_preg  // //c'\
+logistic preterm age preBMI i.parity i.pih_preg  //  //c'\
+logistic lowbirthwt age preBMI i.parity i.pih_preg  //  //c'\
+\
+//imputation\
+mi set wide\
+mi register imputed week \
+mi register regular age preBMI parity no_antibiotic_use_a\
+mi impute chained (regress) week=age preBMI parity no_antibiotic_use_a, noisily add(5)\
+\
+logistic gdm_preg g630 age preBMI parity i.batch _1_week \
+\
+\
+****gut fungi and PIH\
+clear\
+use "Source_data_fungi_birthoutcomes_mediation_4800.dta" //the RA of gut fungi had been z-standardized (z-score)\
+\
+**** \
+drop if pih_preg==. //4603\
+drop if preBMI==.\
+\
+//imputation \
+mi set wide\
+mi register imputed week \
+mi register regular age preBMI parity no_antibiotic_use_a\
+mi impute chained (regress) week=age preBMI parity no_antibiotic_use_a, noisily add(5)\
+\
+\
+logistic pih_preg g609 age preBMI parity i.batch _1_week \
+\
+\
+\
+clear\
+use "Source_data_fungi_birthoutcomes_mediation_4800.dta" //the RA of gut fungi had been z-standardized (z-score)\
+\
+*****Gut fungi and macrosomia\
+drop if macrosomia==.  \
+drop if preBMI==.\
+\
+ \
+mi set wide\
+mi register imputed week \
+mi register regular age preBMI parity no_antibiotic_use_a\
+mi impute chained (regress) week=age preBMI parity no_antibiotic_use_a, noisily add(5)\
+\
+logistic macrosomia g630 age preBMI parity i.batch _1_week //  \
+\
+****data for mediation analysis \
+tab gdm_preg\
+drop if gdm_preg==.\
+\
+logistic macrosomia age preBMI i.parity g630 _1_week i.batch i.gdm_preg // //c'\
+logistic macrosomia age preBMI i.parity g630 _1_week i.batch // //c\
+\
+logistic gdm_preg age preBMI i.parity g630 _1_week i.batch //  //a\
+logistic macrosomia i.gdm_preg age preBMI i.parity _1_week //  //b\
+\
+*****R analysis code  Mediation analysis \
+###mediation analysis\
+rm(list = ls())\
+data <- read_dta("Source_data_Mucor_gdm_macrosomia_mediation_4603.dta")\
+ \
+library(mediation)\
+gdm_preg <- as.factor(data$gdm_preg)\
+med<- glm(gdm_preg~g630+age+preBMI+as.factor(parity)+week1+as.factor(no_antibiotic_use_a), family=binomial(logit), data=data)\
+summary(med) \
+exp(coef(med))\
+\
+outcome<- glm(macrosomia~g630+gdm_preg+age+preBMI+as.factor(parity)+week1+as.factor(no_antibiotic_use_a), family=binomial(logit), data=data)\
+summary(outcome) \
+exp(coef(outcome))\
+\
+summary(med)\
+set.seed(123)\
+CM<- mediate(outcome, med, sims = 500, treat = "g630", mediator = "gdm_preg")\
+summary(CM)  \
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+\
+ \
+}
