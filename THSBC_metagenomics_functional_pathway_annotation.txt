@@ -1,0 +1,82 @@
+
+
+
+# Step1: Data cleaning and quality control
+
+cd [root_path]
+id_list=./idlist.txt
+id=`head -n $SLURM_ARRAY_TASK_ID $id_list | tail -n 1`
+ 
+in1="./1_rawdata/$id``_R1.fq.gz"
+in2="./1_rawdata/$id``_R2.fq.gz"
+o1="./Huake_metagenome/$id"
+
+module load ./miniconda3/bin/kneaddata
+kneaddata --input $in1 --input $in2 --output $o1 --reference-db ./hg38 --trimmomatic ./miniconda3/bin/ -t 20 --trimmomatic-options "ILLUMINACLIP:./TruSeq2-PE.fa:2:30:10 LEADING:3 TRAILING:3" --trimmomatic-options "SLIDINGWINDOW:4:20 MINLEN:50" --bowtie2-options "--very-sensitive -p 24" --reorder --remove-intermediate-output
+ 
+
+
+
+
+# Step2: Taxonomy annotation
+
+cd [root_path]
+id_list=./Huake_Tongji/Huake_metagenome_list_all3.txt
+id=`head -n $SLURM_ARRAY_TASK_ID $id_list | tail -n 1`
+in1="Huake_Tongji/Huake_metagenome/$id/$id``_R1_kneaddata_paired_1.fastq"
+in2="Huake_Tongji/Huake_metagenome/$id/$id``_R1_kneaddata_paired_2.fastq"
+o1="./Huake_Tongji/Huake_metagenome_metaphlan_220501/$id"
+module load ~/miniconda3/bin/metaphlan
+mkdir ./Huake_Tongji/Huake_metagenome_metaphlan_220501/$id/
+metaphlan $in1,$in2 --bowtie2db ./database --bowtie2out $o1/$id``_metagenome.bowtie2.bz2 --nproc 5 --input_type fastq > $o1/$id``_profiled_metagenome.txt
+
+
+
+
+
+# Step3:  Pathway annotation
+
+cd [root_path]
+id_list=./Huake_Tongji/Huake_meta_listfile2/humann_idlist.txt
+id=`head -n $SLURM_ARRAY_TASK_ID $id_list | tail -n 1`
+
+in1="./Huake_Tongji/2_cleandata_kneandata/$id/$id``_R1_kneaddata_paired_1.fastq"
+in2="./Huake_Tongji/2_cleandata_kneandata/$id/$id``_R1_kneaddata_paired_2.fastq"
+in3="./Huake_Tongji/3_taxonomy_metaphlan/output_taxa_1048/$id/$id``_profiled_metagenome.txt"
+
+o0="./Huake_Tongji/4_pathway_humann/merge_fastq/$id.merged.fastq"
+o1="./Huake_Tongji/4_pathway_humann/output/$id"
+
+module load ~/miniconda3/bin/humann
+mkdir ./Huake_Tongji/4_pathway_humann/output/$id/
+cat $in1 $in2 >> $o0
+humann --threads 10 --input $o0  --output $o1 --taxonomic-profile $in3
+
+
+
+
+
+# Step4:  Post-pathway annotation
+
+cd [root_path]
+module load ~/miniconda3/bin/humann
+
+humann_join_tables --input ./tsv_pathabundance --output ./TSBC_humann3_pathabundance_1048_230223.tsv --file_name pathabundance
+humann_join_tables --input ./tsv_genefamilies --output ./TSBC_humann3_genefamilies_1048_230223.tsv --file_name genefamilies
+humann_join_tables --input ./tsv_pathcoverage --output ./TSBC_humann3_pathcoverage_1048_230223.tsv --file_name pathcoverage
+
+
+
+
+
+# Step5:  Post-pathway annotation
+
+cd [root_path]
+module load ~/miniconda3/bin/humann
+
+humann_rename_table --input TSBC_humann3_genefamilies_1048_230223_unstratified.tsv --names uniref90 --output TSBC_humann3_genefamilies_1048_230223_unstratified2.tsv
+
+humann_renorm_table --input TSBC_humann3_pathabundance_1048_230223_stratified.tsv --units relab --mod levelwise --output TSBC_humann3_pathabundance_1048_231007_stratified2.tsv
+humann_renorm_table --input TSBC_humann3_genefamilies_1048_230223_unstratified2.tsv --units relab --output TSBC_humann3_genefamilies_1048_230223_unstratified2.tsv
+humann_renorm_table --input TSBC_humann3_pathabundance_1048_230223_unstratified.tsv --units relab --output test_231008.tsv
+
