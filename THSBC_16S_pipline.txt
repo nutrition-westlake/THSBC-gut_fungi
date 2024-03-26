@@ -1,0 +1,107 @@
+# Step 1 Import data
+
+qiime tools import \
+    --type 'SampleData[PairedEndSequencesWithQuality]'  \
+    --input-path samplepath.txt  \
+    --output-path paired-end-demux.qza  \
+    --input-format PairedEndFastqManifestPhred33V2
+
+
+# Step 2 Generate a summary of the demultiplexing results
+
+qiime demux summarize \
+    --i-data paired-end-demux.qza \
+    --o-visualization demux.qzv 
+
+
+# Step 3 Sequence quality control and feature table construction
+
+qiime dada2 denoise-paired \
+    --i-demultiplexed-seqs paired-end-demux.qza \ 
+    --p-trim-left-f 28  \
+    --p-trim-left-r 28  \
+    --p-trunc-len-f 0  \
+    --p-trunc-len-r 0  \
+    --p-n-threads 20  \
+    --o-representative-sequences rep-seqs-dada2.qza  \
+    --o-table table-dada2.qza  \
+    --o-denoising-stats stats-dada2.qza
+
+
+# Step 4  Filter the features that were present in only a single sample
+
+qiime feature-table filter-features \
+    --i-table table-dada2.qza \
+    --p-min-samples 2  \
+    --o-filtered-table filtered-table.qza
+
+
+# Step 5 Generate a tree for phylogenetic diversity analyses
+
+qiime phylogeny align-to-tree-mafft-fasttree  \
+    --i-sequences rep-seqs-dada2.qza  \
+    --o-alignment aligned-rep-seqs.qza  \
+    --o-masked-alignment masked-aligned-rep-seqs.qza  \
+    --o-tree unrooted-tree.qza  \
+    --o-rooted-tree rooted-tree.qza
+
+
+# Step 6 Alpha rarefaction plotting
+
+qiime diversity alpha-rarefaction  \
+    --i-table filtered-table.qza  \
+    --i-phylogeny rooted-tree.qza  \
+    --p-max-depth 10000  \
+    --m-metadata-file meta.txt  \
+    --o-visualization alpha-rarefaction.qzv
+
+
+# Step 7 Alpha diversity analysis
+
+qiime diversity core-metrics-phylogenetic  \
+    --i-phylogeny rooted-tree.qza  \
+    --i-table filtered-table.qza  \
+    --p-sampling-depth 10000  \
+    --m-metadata-file meta.txt  \
+    --output-dir core-results 
+
+
+#Step 8 Taxonomic analysis
+
+qiime feature-classifier extract-reads  \
+    --i-sequences silva-138-ssu-nr99-seqs-derep-uniq.qza  \
+    --p-f-primer ACTCCTACGGGAGGCAGCAG  \
+    --p-r-primer GGACTACHVGGGTWTCTAAT  \
+    --p-n-jobs 2  \
+    --p-read-orientation 'forward'  \
+    --o-reads silva-138-ssu-nr99-seqs-338f-806r.qza 
+
+qiime rescript dereplicate  \
+    --i-sequences silva-138-ssu-nr99-seqs-338f-806r.qza  \
+    --i-taxa silva-138-ssu-nr99-tax-derep-uniq.qza  \
+    --p-rank-handles 'silva'  \
+    --p-mode 'uniq'  \
+    --o-dereplicated-sequences silva-138-ssu-nr99-seqs-338f-806r-uniq.qza  \
+    --o-dereplicated-taxa  silva-138-ssu-nr99-tax-338f-806r-derep-uniq.qza
+
+qiime feature-classifier fit-classifier-naive-bayes  \
+    --i-reference-reads silva-138-ssu-nr99-seqs-338f-806r-uniq.qza  \
+    --i-reference-taxonomy silva-138-ssu-nr99-tax-338f-806r-derep-uniq.qza  \
+    --o-classifier silva-138-ssu-nr99-338f-806r-classifier.qza
+
+qiime feature-classifier classify-sklearn \
+    --i-classifier silva-138-ssu-nr99-338f-806r-classifier.qza  \
+    --i-reads merge-rep-seqs.qza \
+    --o-classification taxonomysliva138.qza 
+
+ qiime taxa collapse \
+    --i-table  filtered-table.qza \
+    --i-taxonomy taxonomysliva138.qza \
+    --p-level 6 \
+    --o-collapsed-table table-level-6.qza
+
+qiime tools export  \
+    --input-path table-level-6.qza  \
+    --output-path taxa
+
+biom convert -i taxa/feature-table.biom -o taxa/genus.tsv --to-tsv
